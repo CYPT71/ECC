@@ -25,8 +25,8 @@ pf detect ./my-app        # inspect inputs without executing them; JSON output
 pf plan                   # project plan (platform-factory.dev/project-plan/v1)
 pf freeze                 # pin dependencies -> .platform-factory/freeze.lock.json
 pf build                  # deterministic OCI image
-pf verify ./oci-image     # strict release gate: digests, diff_ids, platforms
-pf run --runtime podman ./oci-image
+pf verify .platform-factory/image   # strict release gate: digests, diff_ids, platforms
+pf run --runtime podman .platform-factory/image
 pf diff                   # compare builds
 ```
 
@@ -65,7 +65,7 @@ Install it as a plugin (requires Node.js 18+):
 npm install left-pad && pf build
 
 # GOOD: refresh the lock first
-npm install left-pad && pf freeze && pf build && pf verify ./oci-image
+npm install left-pad && pf freeze && pf build && pf verify .platform-factory/image
 ```
 
 - Skipping `pf verify` and shipping the image.
