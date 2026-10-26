@@ -31,7 +31,7 @@ pf run --runtime podman .platform-factory/image
 pf diff                   # compare builds
 ```
 
-`pf launch --publish --yes` freezes when required, builds, verifies and publishes in one step. `pf sbom PATH...` produces a reproducible SBOM natively.
+`pf launch --publish --yes` freezes when required, builds, verifies, **publishes to a registry and then starts the workload** in one step, so it is an outward-facing action (see rule 6). `pf sbom PATH...` produces a reproducible SBOM natively.
 
 ### Rules that matter
 
@@ -40,6 +40,7 @@ pf diff                   # compare builds
 3. **Ambiguity is an error.** `pf detect` exits with code 2 when a directory matches several ecosystems. Pass `--accept-ambiguous` only when the user confirmed the choice.
 4. **Never add secrets to build inputs.** Inputs end up in the image and its evidence.
 5. **Callbacks are opt-in.** `pf` hooks (CLI/MCP callbacks) only run when `PLATFORM_FACTORY_HOOKS_CONFIG` points to an explicit absolute file, so a cloned repository cannot activate executables.
+6. **Confirm before anything outward-facing.** Before `pf publish`, `pf deploy`, `pf launch --publish` or any command that pushes to a registry, applies to a cluster or starts a workload, state the target registry, the image reference and the action, and wait for the user's explicit approval. Never add `--yes` on your own; try `--dry-run` first where the command offers it. Approval for one publish does not cover the next. Keep tool permissions narrow: allow `pf detect|plan|verify|sbom|status` freely, and keep `pf publish|deploy|launch|run` behind a prompt.
 
 ## Companion Claude Code Hook: freeze guard
 
