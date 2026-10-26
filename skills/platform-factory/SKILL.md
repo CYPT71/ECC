@@ -22,8 +22,9 @@ Full reference: the project's `docs/cli-guide.md`. This skill covers the workflo
 
 ```bash
 pf detect ./my-app        # inspect inputs without executing them; JSON output
+pf init --language node .    # create pf.yaml (language plugin must be loaded: pf plugin load node)
 pf plan                   # project plan (platform-factory.dev/project-plan/v1)
-pf freeze                 # pin dependencies -> .platform-factory/freeze.lock.json
+pf project freeze         # pin dependencies -> .platform-factory/freeze.lock.json
 pf build                  # deterministic OCI image
 pf verify .platform-factory/image   # strict release gate: digests, diff_ids, platforms
 pf run --runtime podman .platform-factory/image
@@ -34,7 +35,7 @@ pf diff                   # compare builds
 
 ### Rules that matter
 
-1. **Freeze before build.** Any change to a dependency manifest makes `.platform-factory/freeze.lock.json` stale. Run `pf freeze`, then `pf build`.
+1. **Freeze before build.** Any change to a dependency manifest makes `.platform-factory/freeze.lock.json` stale. Run `pf project freeze`, then `pf build`.
 2. **Treat `pf verify` as the gate.** A build is not done until `verify` passes.
 3. **Ambiguity is an error.** `pf detect` exits with code 2 when a directory matches several ecosystems. Pass `--accept-ambiguous` only when the user confirmed the choice.
 4. **Never add secrets to build inputs.** Inputs end up in the image and its evidence.
@@ -46,7 +47,7 @@ The project ships a Claude Code plugin, [`platform-factory-guard`](https://githu
 
 | Event | Trigger | Behavior |
 |-------|---------|----------|
-| `PostToolUse` | `Edit`/`Write`/`MultiEdit` on a dependency manifest | Reminds you to run `pf freeze` |
+| `PostToolUse` | `Edit`/`Write`/`MultiEdit` on a dependency manifest | Reminds you to run `pf project freeze` |
 | `PreToolUse` | `Bash` running `pf build\|publish\|launch\|deploy` | Warns when a manifest is newer than the freeze lock; denies if `PF_GUARD_STRICT=1` |
 
 It never executes `pf`, is a no-op outside a `.platform-factory/` project, and fails open. Disable with `PF_GUARD=off`.
@@ -65,12 +66,12 @@ Install it as a plugin (requires Node.js 18+):
 npm install left-pad && pf build
 
 # GOOD: refresh the lock first
-npm install left-pad && pf freeze && pf build && pf verify .platform-factory/image
+npm install left-pad && pf project freeze && pf build && pf verify .platform-factory/image
 ```
 
 - Skipping `pf verify` and shipping the image.
 - Passing `--accept-ambiguous` to silence exit code 2 without checking which ecosystem is intended.
-- Editing `.platform-factory/freeze.lock.json` by hand instead of re-running `pf freeze`.
+- Editing `.platform-factory/freeze.lock.json` by hand instead of re-running `pf project freeze`.
 - Running `pf` with a `PLATFORM_FACTORY_HOOKS_CONFIG` file you did not review.
 
 ## Best Practices
